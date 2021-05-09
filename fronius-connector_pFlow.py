@@ -22,12 +22,10 @@ def fronius_data():
     input_points = {}
     values = {}
     try:
-        url = "http://{}/solar_api/v1/GetPowerFlowRealtimeData.fcgi".format(FRONIUS_HOST)  # noqa E501
-        r = requests.get(url, timeout=3)
-#FREQUENCY - 0.5)
+        url = "http://{}/solar_api/v1/GetPowerFlowRealtimeData.fcgi".format(FRONIUS_HOST)
+        r = requests.get(url, timeout=FREQUENCY - 0.5)
         r.raise_for_status()
         powerflow_data = r.json()
-#        print(powerflow_data)
         values['p_pv'] = powerflow_data['Body']['Data']['Site']['P_PV']
         values['p_grid'] = powerflow_data['Body']['Data']['Site']['P_Grid']
         values['p_load'] = -powerflow_data['Body']['Data']['Site']['P_Load']
@@ -40,7 +38,6 @@ def fronius_data():
         for k, v in values.items():
             if v is None:
                 values[k] = 0
-#        'TS': values['timestamp']
 
         time = datetime.datetime.utcnow()
         input_points = json.dumps(
@@ -83,16 +80,10 @@ if __name__ == '__main__':
     while True:
         try:
             X = fronius_data()
-            if X !='TimeOut':
+            if X !='TimeOut':     # Dont publish if timeout - may chrash the influxdb-connector.
               body = '['+X+']'
-              print (body)
               (result, mid) = mqttc.publish(FRONIUS_MQTT_PREFIX+'/PFlow', body, 0)
-#            values = fronius_data()
-#            for k, v in values.items():
-#                (result, mid) = mqttc.publish("{}/{}".format(FRONIUS_MQTT_PREFIX, k), str(v), 0)
-#            logging.debug("Pubish Result: {} MID: {} for {}: {}".format(result, mid, k, v))  # noqa E501                
-#              print("Publish Result: {} MID: {}".format(result, mid))  # noqa E501                
-              logging.debug("Publish Result: {} MID: {}".format(result, mid))  # noqa E501                
+              logging.debug("Publish Result: {} MID: {}".format(result, mid))               
             time.sleep(FREQUENCY)
         except KeyboardInterrupt:
             break

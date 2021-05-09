@@ -22,7 +22,7 @@ def fronius_data():
     input_points = {}
     values = {}
     try:
-        url = "http://{}/solar_api/v1/GetMeterRealtimeData.cgi?Scope=Device&DeviceId=0".format(FRONIUS_HOST)  # noqa E501
+        url = "http://{}/solar_api/v1/GetMeterRealtimeData.cgi?Scope=Device&DeviceId=0".format(FRONIUS_HOST)
         r = requests.get(url, timeout=5)
         r.raise_for_status()
         powerflow_data = r.json()
@@ -78,12 +78,6 @@ if __name__ == '__main__':
               body = '['+X+']'
               print (body)
               (result, mid) = mqttc.publish(FRONIUS_MQTT_PREFIX+'/Fld1', body, 0)
-#            values = fronius_data()
-#            for k, v in values.items():
-#                (result, mid) = mqttc.publish("{}/{}".format(FRONIUS_MQTT_PREFIX, k), str(v), 0)
-#            logging.debug("Pubish Result: {} MID: {} for {}: {}".format(result, mid, k, v))  # noqa E501                
-#              print("Publish Result: {} MID: {}".format(result, mid))  # noqa E501                
-              logging.debug("Publish Result: {} MID: {}".format(result, mid))  # noqa E501                
             time.sleep(10)
         except KeyboardInterrupt:
             break

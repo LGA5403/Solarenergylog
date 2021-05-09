@@ -19,17 +19,15 @@ def on_message(client, userdata, msg):
     receiveTime = datetime.datetime.utcnow()
 
     m_decode=str(msg.payload.decode("utf-8","ignore"))
-    print ("\ndata m_decode-type ",type(m_decode))
-#    m_decode = m_decode[2:]
-    print (m_decode)
-    if m_decode != 'TimeOut':
+#    print ("\ndata m_decode-type ",type(m_decode))
+    if m_decode != 'TimeOut':   # To avoid the connector to chrash on timeouts on the publisher
       if m_decode[0]=='[':
         message = json.loads(m_decode)
-        print("Message: ",message)
+#        print("Message: ",message)
         dbclient.write_points(message)
-        print("Finished writing to InfluxDB")
+#        print("Finished writing to InfluxDB")
       else:
-        print ("No DATA!!!!!!!!!!!!!!!")
+        print ("No DATA!!!!!!!!!!!!!!!")   # This seems to happen on start.
     else:
       print('>>>>>>>>  TIMEOUT!!!!!  <<<<<<<<<<<')
 print("start")
@@ -42,6 +40,8 @@ print("dbclient created")
 client = mqtt.Client()
 client.on_connect = on_connect
 client.on_message = on_message
+
+# Wait for connect
 connOK = False
 while(connOK is False):
     try:
